@@ -7,13 +7,20 @@ let eye = [0, 0, 0.1];
 let at = [0, 0, 0];
 let up = [0, 1, 0];
 
-
-
 let sun, planet1, planet2, planet3;
 
+// initial camera position
+let cameraPosition = vec3(0, 0, 1); 
+// initial camera rotation angle
+let cameraRotation = 0;
+// camera rotation speed 
+let rotationSpeed = 0.5; 
+// camera zoom speed
+let zoomSpeed = 0.1; 
 
 onload = () => {
   let canvas = document.getElementById("webgl-canvas");
+  window.addEventListener("keydown", handleKeyDown);
 
   gl = WebGLUtils.setupWebGL(canvas);
   if (!gl) {
@@ -37,15 +44,17 @@ onload = () => {
   planet1 = sphere();
   planet1.scale(0.15, 0.15, 0.15);
   planet1.translate(-0.8, 0, 0);
+  
 
   planet2 = sphere();
   planet2.scale(0.1, 0.1, 0.1);
   planet2.translate(-0.5, 0, 0);
+  
 
   planet3 = sphere();
   planet3.scale(0.08, 0.08, 0.08);
   planet3.translate(-0.3, 0, 0);
-
+ 
 
   let vBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
@@ -67,40 +76,122 @@ onload = () => {
 
   render();
 };
+let theta = 0.0;
+let left = -2.0;
+let right = 2.0;
+let bottom = -2.0;
+let ytop = 2.0;
+let near = -100.0;
+let far = 100.0;
+
+function handleKeyDown(event) {
+    switch (event.key) {
+      case "D":
+        case "d":
+        // rotating the camera clockwise
+        theta = 0.1;
+        rotating_camera(theta);
+        break;
+      case "A":
+        case "a":
+        // rotating the camera counter-clockwise
+        theta = -0.1;
+        rotating_camera(theta);
+        break;
+    case "W":
+        case "w":
+        // zoom in camera
+        left += 0.1;
+        right -= 0.1;
+        bottom += 0.1;
+        ytop -= 0.1;
+        break;
+    case "S":
+        case "s":
+        // zoom out camera
+        left -= 0.1;
+        right += 0.1;
+        bottom -= 0.1;
+        ytop += 0.1;
+        break;
+    }
+  }
+  function rotating_camera(theta) {
+    // defining rotation matrices for each view orientation
+    // top-side view; rotation matrix around the Y-axis in the X-Z plane
+    const top_view_rotation_matrix = [
+      [Math.cos(theta), 0, Math.sin(theta)],
+      [0, 1, 0],
+      [-Math.sin(theta), 0, Math.cos(theta)]
+    ];
+  
+      // left-side view; rotation matrix around the X-axis in the Y-Z plane
+    const left_view_rotation_matrix = [
+      [1, 0, 0],
+      [0, Math.cos(theta), Math.sin(theta)],
+      [0, -Math.sin(theta), Math.cos(theta)]
+    ];
+  
+     // front-side view; rotation matrix around the Z-axis in the X-Y plane 
+    const front_view_rotation_matrix = [
+      [Math.cos(theta), -Math.sin(theta), 0],
+      [Math.sin(theta), Math.cos(theta), 0],
+      [0, 0, 1]
+    ];
+  
+    // creating a  function to multiply a rotation matrix with the up vector
+    function multiplyMatrixWithVector(matrix, vector) {
+      const result = [0, 0, 0];
+  
+      // matrix-vector multiplication
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          result[i] += matrix[i][j] * vector[j];
+        }
+      }
+  
+      return result;
+    }
+  
+    // checking  position of the camera and applying the corresponding rotation
+    // in the top-side view of the camera
+    if (eye[0] === 0 && eye[1] === 1 && eye[2] === 0) {
+      up = multiplyMatrixWithVector(top_view_rotation_matrix, up);
+    }
+    // in the left-side view of the camera
+    else if (eye[0] === -1 && eye[1] === 0 && eye[2] === 0) {
+      up = multiplyMatrixWithVector(left_view_rotation_matrix, up);
+    }
+    // in the front-side view of camera
+    else {
+      up = multiplyMatrixWithVector(front_view_rotation_matrix, up);
+    }
+  }
   
 
 
-function render() {
+  function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   
     let time = Date.now() * 0.001; 
   
     // Planet 1 orbit
     let radius1 = 0.8;
-    let speed1 = 0.4;
+    let speed1 = 0.3;
     let planet1X = radius1 * Math.cos(speed1 * time);
     let planet1Z = radius1 * Math.sin(speed1 * time);
-    planet1 = sphere(); 
-    planet1.scale(0.15, 0.15, 0.15);
-    planet1.translate(planet1X, 0, planet1Z);
   
     // Planet 2 orbit
     let radius2 = 0.5;
-    let speed2 = 0.6;
+    let speed2 = 0.5;
     let planet2X = radius2 * Math.cos(speed2 * time);
     let planet2Z = radius2 * Math.sin(speed2 * time);
-    planet2 = sphere(); 
-    planet2.scale(0.1, 0.1, 0.1);
-    planet2.translate(planet2X, 0, planet2Z);
   
     // Planet 3 orbit
     let radius3 = 0.3;
-    let speed3 = 0.8;
+    let speed3 = 0.3;
     let planet3X = radius3 * Math.cos(speed3 * time);
     let planet3Z = radius3 * Math.sin(speed3 * time);
-    planet3 = sphere(); 
-    planet3.scale(0.08, 0.08, 0.08);
-    planet3.translate(planet3X, 0, planet3Z);
   
     // Add vertices and colors for the updated planet positions
     points = [];
@@ -108,8 +199,7 @@ function render() {
   
     // Add vertices and colors for the sun
     let sunVertices = sun.TriangleVertices;
-    // Orange color for nucleus (sun)
-    let sunColor = vec3(1.0, 0.5, 0.0); 
+    let sunColor = vec3(1.0, 0.5, 0.0); // Orange color for nucleus (sun)
     for (let i = 0; i < sunVertices.length; i++) {
       points.push(sunVertices[i]);
       colors.push(sunColor);
@@ -117,26 +207,47 @@ function render() {
      // Blue for planet1
     let planetColor1 = vec3(0.2, 0.2, 1.0);
     // Green for planet2 
-    let planetColor2 = vec3(0.0, 0.6, 0.0); 
-    // Brown for planet3
+    let planetColor2 = vec3(0.0, 0.6, 0.0);
+    // Brown for planet3 
     let planetColor3 = vec3(0.6, 0.4, 0.2); 
-    // Add vertices and colors for the planets
-    let planetVertices1 = planet1.TriangleVertices;
-    let planetVertices2 = planet2.TriangleVertices;
-    let planetVertices3 = planet3.TriangleVertices;
-    for (let i = 0; i < planetVertices1.length; i++) {
-      points.push(planetVertices1[i]);
+  
+    let planet1Vertices = sphere().TriangleVertices;
+    // Rotate planet1 vertices around Y-axis 
+    applyRotation(planet1Vertices, 0.5 * time); 
+    let planet2Vertices = sphere().TriangleVertices; 
+    // Rotate planet2 vertices around Y-axis
+    applyRotation(planet2Vertices, time); 
+    let planet3Vertices = sphere().TriangleVertices;
+    // Rotate planet3 vertices around Y-axis 
+    applyRotation(planet3Vertices, 1.5 * time); 
+  
+    for (let i = 0; i < planet1Vertices.length; i++) {
+      points.push([
+        planet1Vertices[i][0] * 0.15 + planet1X,
+        planet1Vertices[i][1] * 0.15,
+        planet1Vertices[i][2] * 0.15 + planet1Z,
+        1.0,
+      ]);
       colors.push(planetColor1);
     }
-    for (let i = 0; i < planetVertices2.length; i++) {
-      points.push(planetVertices2[i]);
+    for (let i = 0; i < planet2Vertices.length; i++) {
+      points.push([
+        planet2Vertices[i][0] * 0.1 + planet2X,
+        planet2Vertices[i][1] * 0.1,
+        planet2Vertices[i][2] * 0.1 + planet2Z,
+        1.0,
+      ]);
       colors.push(planetColor2);
     }
-    for (let i = 0; i < planetVertices3.length; i++) {
-      points.push(planetVertices3[i]);
+    for (let i = 0; i < planet3Vertices.length; i++) {
+      points.push([
+        planet3Vertices[i][0] * 0.08 + planet3X,
+        planet3Vertices[i][1] * 0.08,
+        planet3Vertices[i][2] * 0.08 + planet3Z,
+        1.0,
+      ]);
       colors.push(planetColor3);
     }
-  
   
     let vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
@@ -155,22 +266,22 @@ function render() {
     gl.enableVertexAttribArray(vColor);
   
     let mvm = lookAt(eye, at, up);
-    gl.uniformMatrix4fv(modelViewMatrix, false, flatten(mvm));
+    let projectionMatrix = ortho(left, right, bottom, ytop, near, far);
+    let combined_matrix = mult(projectionMatrix, mvm);
+    gl.uniformMatrix4fv(modelViewMatrix, false, flatten(combined_matrix));
   
     gl.drawArrays(gl.TRIANGLES, 0, points.length);
   
     requestAnimationFrame(render);
   }
   
-
-
-  
-  
-  
-
-  
-  
-
-  
-
-
+  function applyRotation(vertices, angle) {
+    const cosTheta = Math.cos(angle);
+    const sinTheta = Math.sin(angle);
+    for (let i = 0; i < vertices.length; i++) {
+      const x = vertices[i][0];
+      const z = vertices[i][2];
+      vertices[i][0] = x * cosTheta + z * sinTheta;
+      vertices[i][2] = -x * sinTheta + z * cosTheta;
+    }
+  }
