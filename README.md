@@ -4,11 +4,12 @@
 - Summer 2023
 - Team Project
 - **Deadline:** Jul 15, 23:00
-- **Student Name Surname ID:** NEEDS TO BE UPDATED
-- **Student Name Surname ID:** NEEDS TO BE UPDATED
-- **Student Name Surname ID:** NEEDS TO BE UPDATED
-- **Student Name Surname ID:** NEEDS TO BE UPDATED
-- **Youtube Video Link:** NEEDS TO BE UPDATED
+- **Student Name Surname ID:** Vugar Niftaliyev
+- **Student Name Surname ID:** Babak Aliyev
+- **Student Name Surname ID:** Azar Hasanzada
+- **Student Name Surname ID:** Kamran Hajili
+- **Student Name Surname ID:** Kamal Gojayev
+- **Youtube Video Link:** will send through mail
 
 ---
 
