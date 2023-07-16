@@ -18,6 +18,13 @@ let rotationSpeed = 0.5;
 // camera zoom speed
 let zoomSpeed = 0.1; 
 
+let lightPosition = vec3(1.0, 1.0, 1.0); // Light position
+
+let lightAmbient = vec3(0.2, 0.2, 0.2); // Ambient light color
+let lightDiffuse = vec3(1.0, 1.0, 1.0); // Diffuse light color
+let lightSpecular = vec3(1.0, 1.0, 1.0); // Specular light color
+
+
 onload = () => {
   let canvas = document.getElementById("webgl-canvas");
   window.addEventListener("keydown", handleKeyDown);
@@ -30,6 +37,18 @@ onload = () => {
 
   program = initShaders(gl, "vertex-shader", "fragment-shader");
   gl.useProgram(program);
+    // Set the values of the lighting uniforms
+    let lightPositionUniform = gl.getUniformLocation(program, "lightPosition");
+    gl.uniform3fv(lightPositionUniform, flatten(lightPosition));
+
+    let lightAmbientUniform = gl.getUniformLocation(program, "lightAmbient");
+    gl.uniform3fv(lightAmbientUniform, flatten(lightAmbient));
+
+    let lightDiffuseUniform = gl.getUniformLocation(program, "lightDiffuse");
+    gl.uniform3fv(lightDiffuseUniform, flatten(lightDiffuse));
+
+    let lightSpecularUniform = gl.getUniformLocation(program, "lightSpecular");
+    gl.uniform3fv(lightSpecularUniform, flatten(lightSpecular));
 
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
@@ -224,12 +243,15 @@ function handleKeyDown(event) {
       points.push(sunVertices[i]);
       colors.push(sunColor);
     }
-     // Blue for planet1
-    let planetColor1 = vec3(0.2, 0.2, 1.0);
-    // Green for planet2 
-    let planetColor2 = vec3(0.0, 0.6, 0.0);
-    // Brown for planet3 
-    let planetColor3 = vec3(0.6, 0.4, 0.2); 
+// Blue sphere: Mostly specular (shiny)
+let planetColor1 = vec3(0.0, 0.0, 1.0);
+
+// Green sphere: Mostly diffuse
+let planetColor2 = vec3(0.0, 1.0, 0.0);
+
+// Brown sphere: Mostly translucent
+let planetColor3 = vec3(0.5, 0.25, 0.0);
+
   
     let planet1Vertices = sphere().TriangleVertices;
     // Rotate planet1 vertices around Y-axis 
