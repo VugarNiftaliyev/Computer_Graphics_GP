@@ -86,34 +86,54 @@ let far = 100.0;
 
 function handleKeyDown(event) {
     switch (event.key) {
+      // Move camera up
+      case "ArrowUp": 
+        eye[1] -= 0.1;
+        at[1] -= 0.1;
+        break;
+        // Move camera down
+      case "ArrowDown": 
+        eye[1] += 0.1;
+        at[1] += 0.1;
+        break;
+        // Move camera left
+      case "ArrowLeft": 
+        eye[0] += 0.1;
+        at[0] += 0.1;
+        break;
+        // Move camera right
+      case "ArrowRight": 
+        eye[0] -= 0.1;
+        at[0] -= 0.1;
+        break;
       case "D":
-        case "d":
-        // rotating the camera clockwise
-        theta = 0.1;
-        rotating_camera(theta);
-        break;
+      case "d":
+          // rotating the camera clockwise
+          theta = 0.1;
+          rotating_camera(theta);
+          break;
       case "A":
-        case "a":
-        // rotating the camera counter-clockwise
-        theta = -0.1;
-        rotating_camera(theta);
-        break;
-    case "W":
-        case "w":
-        // zoom in camera
-        left += 0.1;
-        right -= 0.1;
-        bottom += 0.1;
-        ytop -= 0.1;
-        break;
-    case "S":
-        case "s":
-        // zoom out camera
-        left -= 0.1;
-        right += 0.1;
-        bottom -= 0.1;
-        ytop += 0.1;
-        break;
+      case "a":
+          // rotating the camera counter-clockwise
+          theta = -0.1;
+          rotating_camera(theta);
+          break;
+      case "W":
+          case "w":
+          // zoom in camera
+          left += 0.1;
+          right -= 0.1;
+          bottom += 0.1;
+          ytop -= 0.1;
+          break;
+      case "S":
+          case "s":
+          // zoom out camera
+          left -= 0.1;
+          right += 0.1;
+          bottom -= 0.1;
+          ytop += 0.1;
+          break;
     }
   }
   function rotating_camera(theta) {
